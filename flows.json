@@ -1,0 +1,342 @@
+[
+    {
+        "id": "0add0a959b69af8f",
+        "type": "tab",
+        "label": "Flow 3",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "05709595fcafb9e9",
+        "type": "play-soundfile",
+        "z": "0add0a959b69af8f",
+        "name": "sound",
+        "directory": "528939f152c10bb3",
+        "file": "ting.mp3",
+        "options": "{}",
+        "allow_multiple": false,
+        "x": 850,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "da534412ed943b19",
+        "type": "mqtt in",
+        "z": "0add0a959b69af8f",
+        "name": "",
+        "topic": "bank/transfer",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "2226bc1eaaee7c36",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 220,
+        "wires": [
+            [
+                "21f0ffa68878f20d"
+            ]
+        ]
+    },
+    {
+        "id": "21f0ffa68878f20d",
+        "type": "function",
+        "z": "0add0a959b69af8f",
+        "name": "thông báo chuyển khoản",
+        "func": "let data = msg.payload;\n\n// tạo dữ liệu hiển thị\nlet newData = {\n    sender: data.sender,\n    money: data.money,\n    content: data.content,\n    time: new Date().toLocaleString()\n};\n\n// lưu lịch sử\nlet history = flow.get(\"history\") || [];\nhistory.unshift(newData);\n\nif (history.length > 10) {\n    history.pop();\n}\n\nflow.set(\"history\", history);\n\n// TELEGRAM\nlet telegramMsg = {\n    chatId: \"7851890728\",\n    type: \"message\",\n    content:\n        \"Nhận tiền:\\n\" +\n        \"Người gửi: \" + newData.sender + \"\\n\" +\n        \"Số tiền: \" + newData.money + \" VND\\n\" +\n        \"Nội dung: \" + newData.content\n};\n\n// SOUND (chỉ cần trigger)\nlet soundMsg = { payload: true };\n\n// RETURN 4 OUTPUT\nreturn [\n    { payload: newData },     // output 1 → text\n    { payload: history },     // output 2 → table\n    soundMsg,                 // output 3 → play-soundfile\n    { payload: telegramMsg }  // output 4 → telegram\n];",
+        "outputs": 4,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 220,
+        "wires": [
+            [
+                "1b48796cd4e07977"
+            ],
+            [
+                "9f68dd07486698dd"
+            ],
+            [
+                "05709595fcafb9e9"
+            ],
+            [
+                "7e927327cefc2f33"
+            ]
+        ]
+    },
+    {
+        "id": "1b48796cd4e07977",
+        "type": "ui_text",
+        "z": "0add0a959b69af8f",
+        "group": "80dfbbe521cb1b58",
+        "order": 3,
+        "width": 6,
+        "height": 4,
+        "name": "",
+        "label": "Thông báo",
+        "format": "{{msg.payload.sender}} - {{msg.payload.money}} VND - {{msg.payload.content}}",
+        "layout": "col-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 870,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "9f68dd07486698dd",
+        "type": "ui_table",
+        "z": "0add0a959b69af8f",
+        "group": "80dfbbe521cb1b58",
+        "name": "Lịch sử giao dịch",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "columns": [
+            {
+                "field": "sender",
+                "title": "Người gửi ",
+                "width": "",
+                "align": "left",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "money",
+                "title": "Số tiền",
+                "width": "",
+                "align": "left",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "content",
+                "title": "Nội dung",
+                "width": "",
+                "align": "left",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "time",
+                "title": "Thời gian",
+                "width": "",
+                "align": "left",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            }
+        ],
+        "outputs": 0,
+        "cts": false,
+        "x": 890,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "7e927327cefc2f33",
+        "type": "telegram sender",
+        "z": "0add0a959b69af8f",
+        "name": "nhận chuyển khoản",
+        "bot": "7a5a8c8d1ddc0a99",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 890,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0c40556ad9d3d9fd",
+        "type": "ui_spacer",
+        "z": "0add0a959b69af8f",
+        "name": "spacer",
+        "group": "80dfbbe521cb1b58",
+        "order": 2,
+        "width": 5,
+        "height": 1
+    },
+    {
+        "id": "d294d3629b7b1c99",
+        "type": "ui_spacer",
+        "z": "0add0a959b69af8f",
+        "name": "spacer",
+        "group": "80dfbbe521cb1b58",
+        "order": 4,
+        "width": 5,
+        "height": 1
+    },
+    {
+        "id": "a0240bb9cf5a525e",
+        "type": "ui_spacer",
+        "z": "0add0a959b69af8f",
+        "name": "spacer",
+        "group": "80dfbbe521cb1b58",
+        "order": 5,
+        "width": 5,
+        "height": 1
+    },
+    {
+        "id": "f676afc7b53fc831",
+        "type": "ui_spacer",
+        "z": "0add0a959b69af8f",
+        "name": "spacer",
+        "group": "80dfbbe521cb1b58",
+        "order": 6,
+        "width": 5,
+        "height": 1
+    },
+    {
+        "id": "d5801233d4338135",
+        "type": "ui_spacer",
+        "z": "0add0a959b69af8f",
+        "name": "spacer",
+        "group": "80dfbbe521cb1b58",
+        "order": 7,
+        "width": 5,
+        "height": 1
+    },
+    {
+        "id": "fdb67c6949790f45",
+        "type": "ui_spacer",
+        "z": "0add0a959b69af8f",
+        "name": "spacer",
+        "group": "80dfbbe521cb1b58",
+        "order": 8,
+        "width": 5,
+        "height": 1
+    },
+    {
+        "id": "82c1dce4259a247f",
+        "type": "ui_spacer",
+        "z": "0add0a959b69af8f",
+        "name": "spacer",
+        "group": "80dfbbe521cb1b58",
+        "order": 9,
+        "width": 5,
+        "height": 1
+    },
+    {
+        "id": "12ad68250553f2f1",
+        "type": "ui_spacer",
+        "z": "0add0a959b69af8f",
+        "name": "spacer",
+        "group": "80dfbbe521cb1b58",
+        "order": 10,
+        "width": 5,
+        "height": 1
+    },
+    {
+        "id": "528939f152c10bb3",
+        "type": "soundfile-directory",
+        "directory": "D:\\sound"
+    },
+    {
+        "id": "2226bc1eaaee7c36",
+        "type": "mqtt-broker",
+        "name": "MQTT_Broker1",
+        "broker": "d79aa9ba57744096821ace0176761411.s1.eu.hivemq.cloud",
+        "port": "8883",
+        "tls": "",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": true,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "80dfbbe521cb1b58",
+        "type": "ui_group",
+        "name": "Lịch sử nhận tiền",
+        "tab": "48b7f5e6ae022678",
+        "order": 1,
+        "disp": true,
+        "width": 16,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "7a5a8c8d1ddc0a99",
+        "type": "telegram bot",
+        "botname": "IoT_Bot",
+        "usernames": "",
+        "chatids": "7851890728",
+        "baseapiurl": "",
+        "testenvironment": false,
+        "updatemode": "polling",
+        "pollinterval": 300,
+        "usesocks": false,
+        "sockshost": "",
+        "socksprotocol": "socks5",
+        "socksport": 6667,
+        "socksusername": "anonymous",
+        "sockspassword": "",
+        "bothost": "",
+        "botpath": "",
+        "localbothost": "0.0.0.0",
+        "localbotport": 8443,
+        "publicbotport": 8443,
+        "privatekey": "",
+        "certificate": "",
+        "useselfsignedcertificate": false,
+        "sslterminated": false,
+        "verboselogging": false
+    },
+    {
+        "id": "48b7f5e6ae022678",
+        "type": "ui_tab",
+        "name": "Máy thông báo chuyển khoản",
+        "icon": "dashboard",
+        "order": 3,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "3fd132aae5e2d4dc",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-play-soundfile": "0.1.0",
+            "node-red-dashboard": "3.6.6",
+            "node-red-node-ui-table": "0.4.5",
+            "node-red-contrib-telegrambot": "17.1.3"
+        }
+    }
+]
